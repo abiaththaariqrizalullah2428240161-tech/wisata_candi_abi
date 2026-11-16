@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wisata_candi/providers/favorite_provider.dart';
 import 'package:wisata_candi/providers/auth_provider.dart';
-import 'package:wisata_candi/screens/search_screen.dart';
-import 'package:wisata_candi/screens/sign_in_screen.dart';
+import 'package:wisata_candi/screens/home_screen.dart';
 
 void main() {
   runApp(
@@ -26,22 +25,11 @@ class MyApp extends StatelessWidget {
       title: 'Wisata Candi',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          iconTheme: IconThemeData(color: Colors.deepPurple),
-          titleTextStyle: TextStyle(
-            color: Colors.deepPurple,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-        ).copyWith(primary: Colors.deepPurple, surface: Colors.deepPurple[50]),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SearchScreen(),
+      // home: DetailScreen(candi: candiList[0]),
+      home: const HomeScreen(),
     );
   }
 }

@@ -12,7 +12,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String fullName = 'qilfou';
+  String fullName = 'al';
 
   @override
   Widget build(BuildContext context) {
