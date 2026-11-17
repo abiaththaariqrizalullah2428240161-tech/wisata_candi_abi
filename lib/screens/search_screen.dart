@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:wisata_candi/data/candi_data.dart';
 import 'package:wisata_candi/models/candi.dart';
+import 'package:wisata_candi/screens/detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -10,40 +12,73 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  // TODO: 1. Deklarasikan variabel yang dibutuhkan
   List<Candi> _filteredCandis = candiList;
-  String _searchQuery = '';
-  final TextEditingController _searchController = TextEditingController();
+
+  final TextEditingController _searchController =
+      TextEditingController();
+
+  void _searchCandi(String query) {
+    setState(() {
+      _filteredCandis = candiList.where((candi) {
+        return candi.name.toLowerCase().contains(query.toLowerCase()) ||
+            candi.location.toLowerCase().contains(query.toLowerCase()) ||
+            candi.type.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _searchController.clear();
+      _filteredCandis = candiList;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // TODO: 2. Buat appbar dengan judul Pencarian Candi
-      appBar: AppBar(title: const Text('Pencarian Candi')),
-      // TODO: 3. Buat body berupa Column
+      appBar: AppBar(
+        title: const Text('Pencarian Candi'),
+      ),
+
       body: Column(
         children: [
-          // TODO: 4. Buat TextField pencarian sebagai anak dari Column
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                borderRadius: BorderRadius.circular(5),
                 color: Colors.deepPurple[50],
               ),
+
               child: TextField(
-                autofocus: false,
-                // TODO: 6. Implementasi fitur pencarian
                 controller: _searchController,
-                decoration: const InputDecoration(
+                onChanged: _searchCandi,
+
+                decoration: InputDecoration(
                   hintText: 'Cari candi...',
-                  prefixIcon: Icon(Icons.search),
-                  // TODO: 7. Implementasi pengosongan input
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.deepPurple),
+                  prefixIcon: const Icon(Icons.search),
+
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _clearSearch,
                   ),
-                  contentPadding: EdgeInsets.symmetric(
+
+                  border: InputBorder.none,
+
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.deepPurple,
+                    ),
+                  ),
+
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
@@ -51,57 +86,88 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
           ),
-          // TODO: 5. Buat ListView hasil pencarian sebagai anka dari Column
+
           Expanded(
-            child: ListView.builder(
-              itemCount: _filteredCandis.length,
-              itemBuilder: (context, index) {
-                final candi = _filteredCandis[index];
-                // TODO: 8. Implementasi GestureDetector dan Hero animation
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        width: 100,
-                        height: 100,
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10),
-                          ),
-                          child: Image.asset(
-                            candi.imageAsset,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              candi.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+            child: _filteredCandis.isEmpty
+                ? const Center(
+                    child: Text('Candi tidak ditemukan'),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredCandis.length,
+
+                    itemBuilder: (context, index) {
+                      final candi = _filteredCandis[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DetailScreen(candi: candi),
                             ),
-                            const SizedBox(height: 4),
-                            Text(candi.location),
-                          ],
+                          );
+                        },
+
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+
+                          child: Row(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                width: 100,
+                                height: 100,
+
+                                child: Hero(
+                                  tag: candi.imageAsset,
+
+                                  child: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(10),
+
+                                    child: Image.asset(
+                                      candi.imageAsset,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+
+                                  children: [
+                                    Text(
+                                      candi.name,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 4),
+
+                                    Text(candi.location),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

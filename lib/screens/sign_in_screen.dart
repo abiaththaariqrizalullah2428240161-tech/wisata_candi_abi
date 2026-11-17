@@ -1,4 +1,4 @@
-import 'package:flutter/gestures.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,63 +12,87 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  // TODO: 1. Deklarasikan variabel
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  String _errorText = '';
+  final TextEditingController _usernameController =
+      TextEditingController();
+
+  final TextEditingController _passwordController =
+      TextEditingController();
+
   bool _obscurePassword = true;
 
-  // Fungsi sign in
   void _signIn() {
-    final name = _usernameController.text.trim();
-    if (name.isNotEmpty) {
-      context.read<AuthProvider>().signIn(name); // Simpan nama ke AuthProvider
-      Navigator.pop(context); // Kembali ke halaman profil
-    } else {
-      setState(() {
-        _errorText = 'Nama pengguna tidak boleh kosong';
-      });
+    if (_formKey.currentState!.validate()) {
+      final name = _usernameController.text.trim();
+
+      context.read<AuthProvider>().signIn(name);
+
+      Navigator.pop(context);
     }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // TODO: 2. Pasang AppBar
-      appBar: AppBar(title: const Text('Sign In')),
-      // TODO: 3. Pasang body
+      appBar: AppBar(
+        title: const Text('Sign In'),
+      ),
+
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16),
+
             child: Form(
+              key: _formKey,
+
               child: Column(
-                // TODO: 4. Atur alignment
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+
                 children: [
-                  // TODO: 5. Pasang TextFormField nama pengguna
+                  const Icon(
+                    Icons.account_circle,
+                    size: 100,
+                    color: Colors.deepPurple,
+                  ),
+
+                  const SizedBox(height: 30),
+
                   TextFormField(
                     controller: _usernameController,
                     decoration: const InputDecoration(
                       labelText: 'Nama Pengguna',
+                      prefixIcon: Icon(Icons.person),
                       border: OutlineInputBorder(),
                     ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Nama pengguna tidak boleh kosong';
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(height: 20),
 
-                  // TODO: 6. Pasang TextFormField kata sandi
+                  const SizedBox(height: 20),
 
                   TextFormField(
                     controller: _passwordController,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Kata Sandi',
-                      errorText: _errorText.isNotEmpty ? _errorText : null,
+                      prefixIcon: const Icon(Icons.lock),
                       border: const OutlineInputBorder(),
 
-                      suffixIcon: _passwordController.text.isNotEmpty
-                          ? IconButton(
+                      suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
@@ -79,42 +103,44 @@ class _SignInScreenState extends State<SignInScreen> {
                               ? Icons.visibility_off
                               : Icons.visibility,
                         ),
-                      )
-                          : null,
+                      ),
                     ),
-                    obscureText: _obscurePassword,
-                    onChanged: (value) {
-                      setState(() {});
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Kata sandi tidak boleh kosong';
+                      }
+                      return null;
                     },
                   ),
 
                   const SizedBox(height: 20),
 
-                  // TODO: 7. Pasang ElevatedButton Sign In
                   ElevatedButton(
                     onPressed: _signIn,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.all(14),
+                    ),
                     child: const Text('Sign In'),
                   ),
+
                   const SizedBox(height: 10),
 
-                  // TODO: 8. Pasang TextButton Sign Up / RichText
-                  RichText(
-                    text: TextSpan(
-                      text: 'Belum punya akun? ',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.deepPurple,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Daftar di sini.',
-                          style: const TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Fitur pendaftaran belum tersedia',
+                            ),
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {},
-                        ),
-                      ],
+                        );
+                      },
+                      child: const Text(
+                        'Belum punya akun? Daftar di sini.',
+                      ),
                     ),
                   ),
                 ],
